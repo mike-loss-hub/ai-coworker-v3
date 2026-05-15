@@ -1,0 +1,25 @@
+# AI Co-Worker v3
+# Python 3.8+ required
+#
+# Setup:
+#   python3 -m venv .venv
+#   source .venv/bin/activate    (macOS/Linux)
+#   .venv\Scripts\activate       (Windows)
+#   pip install -r requirements.txt
+
+# Dashboard server with file-watching auto-reload
+watchdog>=4.0.0
+
+# Rich terminal output for diagnostics
+rich>=13.0.0
+
+# YAML support for structured memory files
+pyyaml>=6.0
+
+# Markdown parsing for memory file validation
+markdown>=3.5
+
+# Google Calendar API + Meet integration
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.2.0
+google-auth-oauthlib>=1.0.0

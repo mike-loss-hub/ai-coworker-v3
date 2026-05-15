@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Intelligence Dashboard</title>
+<style>
+:root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #e2e8f0; --muted: #94a3b8; --green: #22c55e; --yellow: #eab308; --red: #ef4444; --blue: #3b82f6; --accent: #8b5cf6; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+h1 { font-size: 1.5rem; margin-bottom: 4px; }
+h2 { font-size: 1.1rem; color: var(--muted); margin-bottom: 16px; font-weight: 400; }
+h3 { font-size: 0.95rem; margin-bottom: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; margin-top: 20px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+.card-full { grid-column: 1 / -1; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th { text-align: left; padding: 8px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 600; }
+td { padding: 8px; border-bottom: 1px solid var(--border); }
+.health-green { color: var(--green); } .health-yellow { color: var(--yellow); } .health-red { color: var(--red); }
+.stat { text-align: center; }
+.stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; }
+.stats-row { display: flex; justify-content: space-around; margin-bottom: 16px; }
+.task-item, .event-item, .decision-item { padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.task-item:last-child, .event-item:last-child, .decision-item:last-child { border-bottom: none; }
+.due { color: var(--yellow); font-size: 0.75rem; }
+.overdue { color: var(--red); font-size: 0.75rem; }
+.event-date { color: var(--blue); font-size: 0.75rem; font-weight: 600; }
+.header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+.refresh-btn { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+.refresh-btn:hover { opacity: 0.9; }
+.alert { background: rgba(239,68,68,0.1); border: 1px solid var(--red); border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 0.85rem; }
+.alert-warn { background: rgba(234,179,8,0.1); border-color: var(--yellow); }
+.pillar-bar { display: flex; align-items: center; margin: 6px 0; font-size: 0.85rem; }
+.pillar-name { width: 160px; }
+.pillar-fill { height: 20px; border-radius: 4px; margin: 0 8px; }
+.status { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+.status-active { background: rgba(34,197,94,0.15); color: var(--green); }
+#loading { text-align: center; padding: 40px; color: var(--muted); }
+#error { display: none; text-align: center; padding: 20px; color: var(--red); }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>Portfolio Intelligence Dashboard</h1>
+    <h2>Portable Memory & Context Infrastructure — $6.2M Portfolio</h2>
+  </div>
+  <div>
+    <span id="last-updated" style="color: var(--muted); font-size: 0.8rem; margin-right: 12px;"></span>
+    <button class="refresh-btn" onclick="loadData()">Refresh</button>
+  </div>
+</div>
+<div id="loading">Loading portfolio data...</div>
+<div id="error"></div>
+<div id="dashboard" class="grid" style="display:none;"></div>
+
+<script>
+const MEMORY_BASE = './memory/role';
+
+async function fetchFile(path) {
+  try {
+    const r = await fetch(`${MEMORY_BASE}/${path}`);
+    if (!r.ok) throw new Error(`${path}: ${r.status}`);
+    return await r.text();
+  } catch(e) { console.warn(e); return null; }
+}
+
+function parseHealthEmoji(text) {
+  if (text.includes('🔴') || text.toLowerCase().includes('red')) return 'red';
+  if (text.includes('🟡') || text.toLowerCase().includes('yellow')) return 'yellow';
+  return 'green';
+}
+
+function parseMarkdownTable(text) {
+  const lines = text.split('\n').filter(l => l.trim().startsWith('|'));
+  if (lines.length < 3) return [];
+  const headers = lines[0].split('|').filter(c => c.trim()).map(c => c.trim());
+  return lines.slice(2).map(line => {
+    const cells = line.split('|').filter(c => c.trim()).map(c => c.trim());
+    const row = {};
+    headers.forEach((h, i) => row[h] = cells[i] || '');
+    return row;
+  });
+}
+
+function parseTasks(text) {
+  return parseMarkdownTable(text).map(r => ({
+    task: r['Task'] || r['task'] || '',
+    due: r['Due'] || r['due'] || '',
+    status: r['Status'] || r['status'] || '',
+    owner: r['Owner'] || r['owner'] || ''
+  })).filter(t => t.task);
+}
+
+async function loadData() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+
+  const [portfolioState, budgetTracker, activeTasks, blockedTasks, upcoming, pillarCoverage, commentPeriods] = await Promise.all([
+    fetchFile('portfolio/portfolio-state.md'),
+    fetchFile('portfolio/budget-tracker.md'),
+    fetchFile('tasks/active.md'),
+    fetchFile('tasks/blocked.md'),
+    fetchFile('calendar/upcoming.md'),
+    fetchFile('portfolio/pillar-coverage.md'),
+    fetchFile('standards/comment-periods.md')
+  ]);
+
+  // Also fetch recent decisions
+  const decisionFiles = ['2026-04-15-learntrail-support.md', '2026-04-22-standards-alignment-strategy.md'];
+  const decisions = await Promise.all(decisionFiles.map(f => fetchFile(`decisions/${f}`)));
+
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'grid';
+
+  let html = '';
+
+  // Stats row
+  const grantees = portfolioState ? (portfolioState.match(/Active/g) || []).length : 0;
+  const redCount = portfolioState ? (portfolioState.match(/🔴/g) || []).length : 0;
+  const yellowCount = portfolioState ? (portfolioState.match(/🟡/g) || []).length : 0;
+  const greenCount = portfolioState ? (portfolioState.match(/🟢/g) || []).length : 0;
+
+  html += `<div class="card card-full"><div class="stats-row">
+    <div class="stat"><div class="stat-value">8</div><div class="stat-label">Active Grants</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--green)">${greenCount}</div><div class="stat-label">Healthy</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--yellow)">${yellowCount}</div><div class="stat-label">Watch</div></div>
+    <div class="stat"><div class="stat-value" style="color:var(--red)">${redCount}</div><div class="stat-label">At Risk</div></div>
+    <div class="stat"><div class="stat-value">$5.7M</div><div class="stat-label">Committed</div></div>
+    <div class="stat"><div class="stat-value">$500K</div><div class="stat-label">Unallocated</div></div>
+  </div></div>`;
+
+  // Alerts
+  let alerts = '';
+  if (portfolioState && portfolioState.includes('🔴')) {
+    alerts += '<div class="alert">🔴 LearnTrail Research — CTO departed. Architecture review due May 30. 90-day support runway in effect.</div>';
+  }
+  if (portfolioState && portfolioState.includes('🟡')) {
+    alerts += '<div class="alert alert-warn">🟡 CredBridge Institute — 6 weeks behind schedule. Revised timeline review due May 7.</div>';
+    alerts += '<div class="alert alert-warn">🟡 EdgeWise Computing — Chromebook benchmarks below target. Quantization experiments in progress.</div>';
+  }
+  if (commentPeriods && commentPeriods.includes('May 20')) {
+    alerts += '<div class="alert alert-warn">📋 1EdTech CLR 3.0 comment period closes May 20 — comments needed.</div>';
+  }
+  if (alerts) html += `<div class="card card-full">${alerts}</div>`;
+
+  // Grantee status grid
+  if (portfolioState) {
+    const rows = parseMarkdownTable(portfolioState);
+    html += '<div class="card card-full"><h3>Grantee Status</h3><table><tr><th>Grantee</th><th>Pillar</th><th>Amount</th><th>Status</th><th>Health</th><th>Next Milestone</th></tr>';
+    rows.forEach(r => {
+      const health = parseHealthEmoji(r['Health'] || '');
+      const hClass = `health-${health}`;
+      const hLabel = health === 'red' ? '🔴 Red' : health === 'yellow' ? '🟡 Yellow' : '🟢 Green';
+      html += `<tr><td>${r['Grantee']||''}</td><td>${r['Pillar']||''}</td><td>${r['Amount']||''}</td><td><span class="status status-active">${r['Status']||''}</span></td><td class="${hClass}">${hLabel}</td><td>${r['Next Milestone']||''}</td></tr>`;
+    });
+    html += '</table></div>';
+  }
+
+  // Tasks
+  if (activeTasks) {
+    const tasks = parseTasks(activeTasks);
+    html += '<div class="card"><h3>Active Tasks</h3>';
+    tasks.forEach(t => {
+      const dueClass = t.due && new Date(t.due + ', 2026') < new Date() ? 'overdue' : 'due';
+      html += `<div class="task-item">☐ ${t.task}<br><span class="${dueClass}">Due: ${t.due} — ${t.status}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  // Upcoming events
+  if (upcoming) {
+    html += '<div class="card"><h3>Upcoming Events</h3>';
+    const eventLines = upcoming.split('\n').filter(l => l.startsWith('- **'));
+    eventLines.slice(0, 6).forEach(l => {
+      const match = l.match(/\*\*(.+?)\*\*\s*—\s*(.+)/);
+      if (match) html += `<div class="event-item"><span class="event-date">${match[1]}</span><br>${match[2]}</div>`;
+    });
+    // Deadlines
+    const deadlines = upcoming.split('\n').filter(l => l.startsWith('- **May') || l.startsWith('- **Jun'));
+    deadlines.forEach(l => {
+      const match = l.match(/\*\*(.+?)\*\*\s*—\s*(.+)/);
+      if (match) html += `<div class="event-item"><span class="event-date">${match[1]}</span> — ${match[2]}</div>`;
+    });
+    html += '</div>';
+  }
+
+  // Pillar coverage
+  html += '<div class="card"><h3>Pillar Coverage</h3>';
+  const pillars = [
+    { name: 'Longitudinal Memory', grants: 2, budget: 1.6, color: '#3b82f6' },
+    { name: 'Provenance', grants: 3, budget: 2.0, color: '#8b5cf6' },
+    { name: 'Agent Orchestration', grants: 2, budget: 1.7, color: '#06b6d4' },
+    { name: 'Local-First', grants: 3, budget: 1.95, color: '#22c55e' }
+  ];
+  pillars.forEach(p => {
+    const pct = (p.budget / 2.0) * 100;
+    html += `<div class="pillar-bar"><span class="pillar-name">${p.name}</span><div style="flex:1;background:var(--border);border-radius:4px;"><div class="pillar-fill" style="width:${Math.min(pct,100)}%;background:${p.color}"></div></div><span style="width:80px;text-align:right;font-size:0.8rem;">$${p.budget}M (${p.grants})</span></div>`;
+  });
+  html += '</div>';
+
+  // Recent decisions
+  html += '<div class="card"><h3>Recent Decisions</h3>';
+  decisions.filter(Boolean).forEach(d => {
+    const titleMatch = d.match(/# Decision: (.+)/);
+    const dateMatch = d.match(/\*\*Date:\*\* (.+)/);
+    const decisionMatch = d.match(/## Decision\n(.+)/);
+    if (titleMatch) {
+      html += `<div class="decision-item"><strong>${titleMatch[1]}</strong><br><span class="event-date">${dateMatch?dateMatch[1]:''}</span><br><span style="color:var(--muted);font-size:0.8rem;">${decisionMatch?decisionMatch[1].substring(0,120)+'...':''}</span></div>`;
+    }
+  });
+  html += '</div>';
+
+  // Blocked tasks
+  if (blockedTasks) {
+    const blocked = parseMarkdownTable(blockedTasks);
+    if (blocked.length) {
+      html += '<div class="card"><h3>Blocked Items</h3>';
+      blocked.forEach(t => {
+        const task = t['Task'] || '';
+        const blocker = t['Blocker'] || '';
+        const since = t['Since'] || '';
+        html += `<div class="task-item" style="color:var(--red)">⊘ ${task}<br><span style="color:var(--muted);font-size:0.8rem;">Blocker: ${blocker}</span><br><span style="color:var(--muted);font-size:0.75rem;">Since: ${since}</span></div>`;
+      });
+      html += '</div>';
+    }
+  }
+
+  document.getElementById('dashboard').innerHTML = html;
+  document.getElementById('last-updated').textContent = `Updated: ${new Date().toLocaleTimeString()}`;
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
+</body>
+</html>

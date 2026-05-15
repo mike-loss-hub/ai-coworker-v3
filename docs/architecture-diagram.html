@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Co-Worker — Architecture Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fff; font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: #1a1a1a; padding: 30px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #666; text-align: center; margin-bottom: 24px; }
+  svg { display: block; margin: 0 auto; }
+  .tech-bar { margin-top: 20px; padding: 14px 20px; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; }
+  .tech-bar h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 8px; }
+  .tech-bar p { font-size: 13px; line-height: 1.6; color: #333; }
+  .tech-bar span { display: inline-block; background: #e8e8e8; padding: 2px 8px; border-radius: 3px; margin: 2px 3px; font-size: 12px; font-weight: 500; }
+  @media print {
+    body { padding: 10px; }
+    .tech-bar { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<h1>AI Co-Worker — Agentic Architecture</h1>
+<p class="subtitle">Parallel Multi-Agent System with Structured Memory and Tiered Model Routing</p>
+
+<svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg" style="max-width:1000px; width:100%;">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- USER LAYER -->
+  <rect x="350" y="10" width="300" height="44" rx="22" fill="#1a1a1a" filter="url(#shadow)"/>
+  <text x="500" y="37" text-anchor="middle" fill="#fff" font-size="14" font-weight="600">Human User</text>
+
+  <!-- Arrow down -->
+  <line x1="500" y1="54" x2="500" y2="80" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="520" y="72" font-size="9" fill="#888">Natural language</text>
+
+  <!-- INTENT ROUTER / ORCHESTRATOR -->
+  <rect x="280" y="82" width="440" height="54" rx="8" fill="#2563eb" filter="url(#shadow)"/>
+  <text x="500" y="104" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Orchestrator — Intent Router &amp; Resource Planner</text>
+  <text x="500" y="122" text-anchor="middle" fill="#c7d9fc" font-size="10">Mode selection · Skill matching · Context planning · Model tier assignment</text>
+
+  <!-- Arrow down to parallel section -->
+  <line x1="500" y1="136" x2="500" y2="158" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- RESOURCE OPTIMIZATION BADGE -->
+  <rect x="740" y="86" width="240" height="46" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
+  <text x="860" y="104" text-anchor="middle" fill="#16a34a" font-size="11" font-weight="600">Resource Optimization</text>
+  <text x="860" y="120" text-anchor="middle" fill="#15803d" font-size="9">Context mgmt · Model routing · 95% savings</text>
+  <line x1="740" y1="109" x2="720" y2="109" stroke="#16a34a" stroke-width="1" stroke-dasharray="4"/>
+
+  <!-- PARALLEL EXECUTION ZONE -->
+  <rect x="60" y="160" width="880" height="175" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="6"/>
+  <text x="80" y="180" font-size="11" font-weight="600" fill="#475569">Parallel Agent Execution — Fan-Out / Fan-In</text>
+
+  <!-- Tier labels -->
+  <text x="80" y="205" font-size="9" fill="#94a3b8" font-weight="600">TIER 1 — PRIMARY PERSPECTIVES (Sonnet)</text>
+
+  <!-- 5 perspective boxes -->
+  <rect x="80" y="212" width="155" height="40" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="157" y="228" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Technical</text>
+  <text x="157" y="242" text-anchor="middle" fill="#1e40af" font-size="9">Architecture</text>
+
+  <rect x="245" y="212" width="155" height="40" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="322" y="228" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Equity &amp; Learner</text>
+  <text x="322" y="242" text-anchor="middle" fill="#1e40af" font-size="9">Impact</text>
+
+  <rect x="410" y="212" width="155" height="40" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="487" y="228" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Grantmaking</text>
+  <text x="487" y="242" text-anchor="middle" fill="#1e40af" font-size="9">Operations</text>
+
+  <rect x="575" y="212" width="155" height="40" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="652" y="228" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Ecosystem</text>
+  <text x="652" y="242" text-anchor="middle" fill="#1e40af" font-size="9">Intelligence</text>
+
+  <rect x="740" y="212" width="155" height="40" rx="5" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+  <text x="817" y="228" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Stakeholder</text>
+  <text x="817" y="242" text-anchor="middle" fill="#1e40af" font-size="9">Coalition</text>
+
+  <!-- Tier 2 -->
+  <text x="80" y="275" font-size="9" fill="#94a3b8" font-weight="600">TIER 2 — SPECIALISTS (Sonnet/Haiku)</text>
+
+  <rect x="80" y="282" width="120" height="32" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="140" y="302" text-anchor="middle" fill="#3730a3" font-size="9">Standards Analyst</text>
+
+  <rect x="210" y="282" width="120" height="32" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="270" y="302" text-anchor="middle" fill="#3730a3" font-size="9">Local-First Spec.</text>
+
+  <rect x="340" y="282" width="120" height="32" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="400" y="302" text-anchor="middle" fill="#3730a3" font-size="9">Funder Tracker</text>
+
+  <rect x="470" y="282" width="120" height="32" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="530" y="302" text-anchor="middle" fill="#3730a3" font-size="9">Research Monitor</text>
+
+  <rect x="600" y="282" width="120" height="32" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="660" y="302" text-anchor="middle" fill="#3730a3" font-size="9">Comms Drafter</text>
+
+  <rect x="730" y="282" width="120" height="32" rx="4" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1"/>
+  <text x="790" y="302" text-anchor="middle" fill="#3730a3" font-size="9">Outcomes Analyst</text>
+
+  <!-- Tier 3 label -->
+  <text x="860" y="275" font-size="9" fill="#94a3b8" font-weight="600"></text>
+
+  <!-- Convergence arrow -->
+  <text x="500" y="328" text-anchor="middle" font-size="9" fill="#64748b" font-style="italic">All perspectives converge → Opus synthesizes Decision Frame</text>
+
+  <!-- SKILLS LAYER -->
+  <line x1="500" y1="335" x2="500" y2="358" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <rect x="120" y="360" width="760" height="50" rx="8" fill="#fefce8" stroke="#eab308" stroke-width="1" filter="url(#shadow)"/>
+  <text x="500" y="382" text-anchor="middle" fill="#854d0e" font-size="12" font-weight="600">Skill Workflows (11) — Intent-Matched, Resource-Tiered</text>
+  <text x="500" y="398" text-anchor="middle" fill="#a16207" font-size="10">Briefing · Proposal Eval · Meeting Prep · Debrief · Decision Frame · Email · Tasks · Portfolio Review · Diagnostic · Export · Import</text>
+
+  <!-- Arrows down to memory -->
+  <line x1="340" y1="410" x2="340" y2="440" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="500" y1="410" x2="500" y2="440" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="660" y1="410" x2="660" y2="440" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- MEMORY LAYER — 3 boxes -->
+  <rect x="60" y="442" width="280" height="90" rx="8" fill="#fdf2f8" stroke="#ec4899" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="200" y="466" text-anchor="middle" fill="#be185d" font-size="12" font-weight="700">Human Layer</text>
+  <text x="200" y="482" text-anchor="middle" fill="#9d174d" font-size="10">PORTABLE — travels with the person</text>
+  <text x="200" y="498" text-anchor="middle" fill="#831843" font-size="9">Identity · Working Style · Feedback</text>
+  <text x="200" y="512" text-anchor="middle" fill="#831843" font-size="9">Growth Log · Portable Skills</text>
+
+  <rect x="360" y="442" width="280" height="90" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="500" y="466" text-anchor="middle" fill="#1d4ed8" font-size="12" font-weight="700">Role Layer</text>
+  <text x="500" y="482" text-anchor="middle" fill="#1e40af" font-size="10">JOB-SPECIFIC — stays with the position</text>
+  <text x="500" y="498" text-anchor="middle" fill="#1e3a8a" font-size="9">Portfolio · Grantees · Contacts · Tasks</text>
+  <text x="500" y="512" text-anchor="middle" fill="#1e3a8a" font-size="9">Calendar · Decisions · Standards · Ecosystem</text>
+
+  <rect x="660" y="442" width="280" height="90" rx="8" fill="#f0fdf4" stroke="#22c55e" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="800" y="466" text-anchor="middle" fill="#15803d" font-size="12" font-weight="700">Bridge Layer</text>
+  <text x="800" y="482" text-anchor="middle" fill="#166534" font-size="10">TRANSFERABLE — lessons across roles</text>
+  <text x="800" y="498" text-anchor="middle" fill="#14532d" font-size="9">Patterns · Anti-Patterns</text>
+  <text x="800" y="512" text-anchor="middle" fill="#14532d" font-size="9">Lessons Learned · Relationship Archetypes</text>
+
+  <!-- Memory stats -->
+  <text x="500" y="550" text-anchor="middle" font-size="10" fill="#64748b">97 structured files · ~17,500 words · Persistent across sessions · Auto-maintained</text>
+
+  <!-- BOTTOM ROW: External tools + Diagnostic + Dashboard -->
+  <line x1="200" y1="558" x2="200" y2="578" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="500" y1="558" x2="500" y2="578" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="800" y1="558" x2="800" y2="578" stroke="#555" stroke-width="1" marker-end="url(#arrow)"/>
+
+  <rect x="80" y="580" width="240" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1"/>
+  <text x="200" y="600" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">External Tools</text>
+  <text x="200" y="614" text-anchor="middle" fill="#64748b" font-size="9">Web Search · Email · Calendar · Tasks</text>
+
+  <rect x="380" y="580" width="240" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1"/>
+  <text x="500" y="600" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">Diagnostic System</text>
+  <text x="500" y="614" text-anchor="middle" fill="#64748b" font-size="9">7 automated checks · Discovery-based validation</text>
+
+  <rect x="680" y="580" width="240" height="44" rx="6" fill="#fff" stroke="#94a3b8" stroke-width="1"/>
+  <text x="800" y="600" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">Dashboard</text>
+  <text x="800" y="614" text-anchor="middle" fill="#64748b" font-size="9">HTML portfolio visualization</text>
+
+  <!-- Portability arrows at bottom -->
+  <rect x="60" y="645" width="880" height="40" rx="6" fill="#faf5ff" stroke="#a855f7" stroke-width="1"/>
+  <text x="500" y="665" text-anchor="middle" fill="#7e22ce" font-size="11" font-weight="600">Portability Engine — export --portable (person + lessons) · export --role (successor) · export --full (backup)</text>
+  <text x="500" y="678" text-anchor="middle" fill="#9333ea" font-size="9">Context ownership: human layer is yours, role layer is institutional, bridge layer transfers</text>
+
+  <!-- Model tier legend -->
+  <rect x="60" y="700" width="12" height="12" rx="2" fill="#1a1a1a"/>
+  <text x="78" y="710" font-size="9" fill="#555" font-weight="600">Opus</text>
+  <text x="108" y="710" font-size="9" fill="#888">— Synthesis &amp; judgment</text>
+  <rect x="260" y="700" width="12" height="12" rx="2" fill="#2563eb"/>
+  <text x="278" y="710" font-size="9" fill="#555" font-weight="600">Sonnet</text>
+  <text x="314" y="710" font-size="9" fill="#888">— Analysis &amp; drafting</text>
+  <rect x="500" y="700" width="12" height="12" rx="2" fill="#94a3b8"/>
+  <text x="518" y="710" font-size="9" fill="#555" font-weight="600">Haiku</text>
+  <text x="549" y="710" font-size="9" fill="#888">— Data gathering &amp; lookups</text>
+  <rect x="750" y="700" width="12" height="12" rx="2" fill="#fff" stroke="#555" stroke-width="1"/>
+  <text x="768" y="710" font-size="9" fill="#555" font-weight="600">Parallel</text>
+  <text x="803" y="710" font-size="9" fill="#888">— Independent agents run simultaneously</text>
+</svg>
+
+<div class="tech-bar">
+  <h3>Technologies</h3>
+  <p>
+    <span>Anthropic Claude (Opus · Sonnet · Haiku)</span>
+    <span>Claude Code CLI</span>
+    <span>Multi-Agent Orchestration</span>
+    <span>Parallel Agent Execution (Fan-Out/Fan-In)</span>
+    <span>Tiered Model Routing</span>
+    <span>Markdown-Based Persistent Memory</span>
+    <span>Intent-Based NL Routing</span>
+    <span>17 Agent Perspectives (4 Tiers)</span>
+    <span>11 Skill Workflows</span>
+    <span>Automated Diagnostic System (Python)</span>
+    <span>HTML/CSS/JS Dashboard</span>
+    <span>Context-Aware Resource Optimization</span>
+    <span>Portable Context Architecture (3-Layer)</span>
+    <span>Dynamic External Tool Discovery</span>
+  </p>
+</div>
+
+</body>
+</html>
